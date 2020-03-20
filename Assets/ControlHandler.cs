@@ -3,21 +3,26 @@ using System.Collections.Generic;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+public class ControlHandler : MonoBehaviour {
 
+	float invertPitch = -1;
+
+	bool controlsAreEnabled = true;
+
+	[Header("General")]
 	[Tooltip("In m/s")] [SerializeField] float baseMovementSpeed = 16f;
 
+	[Header("Body Rotation on Position")]
 	[SerializeField] float pitchFactor = -5f;
 	[SerializeField] float yawFactor = 5f;
 
-	[SerializeField] float controlPitchFactor = -10f;
-	[SerializeField] float controlYawFactor = 10f;
-	[SerializeField] float controlRollFactor = -30f;
+	[Header("Body Rotation On Control")]
+	[SerializeField] float controlPitchFactor = -20f;
+	[SerializeField] float controlYawFactor = 20f;
+	[SerializeField] float controlRollFactor = -40f;
 
 	float xThrow;
 	float yThrow;
-
-	float invertPitch = -1;
 
 	// Start is called before the first frame update
 	void Start() {
@@ -29,13 +34,15 @@ public class Player : MonoBehaviour {
 		runControls();
   }
 
-
 	private void runControls() {
-		handleTranslation();
-		handleRotation();
+		if (controlsAreEnabled) {
+			HandleTranslation();
+			HandleRotation();
+		}
 	}
 
-	private void handleTranslation() {
+
+	private void HandleTranslation() {
 		xThrow = CrossPlatformInputManager.GetAxis("Horizontal");
 		yThrow = CrossPlatformInputManager.GetAxis("Vertical");
 
@@ -48,12 +55,17 @@ public class Player : MonoBehaviour {
 		transform.localPosition = new Vector3(xPosition, yPosition, transform.localPosition.z);
 	}
 
-	private void handleRotation() {
+	private void HandleRotation() {
 
 		float pitch = transform.localPosition.y * pitchFactor + yThrow * controlPitchFactor * invertPitch; // x axis
 		float yaw = transform.localPosition.x * yawFactor + xThrow * controlYawFactor; // y axis
 		float roll = xThrow * controlRollFactor; // z axis
 
 		transform.localRotation = Quaternion.Euler(pitch, yaw, roll);
+	}
+
+	private void StopMovement() {
+		controlsAreEnabled = false;
+		print("controls disabled");
 	}
 }
